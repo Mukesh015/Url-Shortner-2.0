@@ -1,7 +1,13 @@
 "use client";
 import React from "react";
+import { signIn, useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function Login() {
+  const session = useSession();
+  if (session.status === "authenticated") {
+    redirect("/");
+  }
   return (
     <div className="font-[sans-serif] bg-white text-[#333]">
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -112,7 +118,13 @@ export default function Login() {
                 or continue with
               </p>
               <div className="space-x-8 flex justify-center">
-                <button type="button" className="border-none outline-none">
+                <button
+                  type="button"
+                  onClick={() => {
+                    signIn("google");
+                  }}
+                  className="border-none outline-none"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="30px"
@@ -151,7 +163,13 @@ export default function Login() {
                     />
                   </svg>
                 </button>
-                <button type="button" className="border-none outline-none">
+                <button
+                  onClick={() => {
+                    signIn("facebook");
+                  }}
+                  type="button"
+                  className="border-none outline-none"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="30px"
@@ -164,8 +182,13 @@ export default function Login() {
                     ></path>
                   </svg>
                 </button>
-                <button>
-                  <span class="[&>svg]:h-8">
+                <button
+                  type="button"
+                  onClick={() => {
+                    signIn("github");
+                  }}
+                >
+                  <span className="[&>svg]:h-8">
                     <svg
                       className=""
                       xmlns="http://www.w3.org/2000/svg"
