@@ -56,6 +56,9 @@ async function register(req, res) {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
+      if (req.file && req.file.path) {
+        // Upload image to cloudinary
+    
       cloudinary.uploader.upload(req.file.path, async function (err, result) {
         if (err) {
           console.error("Cloudinary upload failed:", err);
@@ -65,6 +68,7 @@ async function register(req, res) {
         }
         avatar = result.url;
       });
+    }
     } catch {
       throw new Error("No profile picture found, setup failed.");
     }
