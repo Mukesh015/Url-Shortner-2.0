@@ -1,13 +1,14 @@
 "use client";
 import { useCallback, useState, useEffect } from "react";
+import { signIn, useSession, signOut } from "next-auth/react";
 import { toast, ToastContainer } from "react-toastify";
 import NextTopLoader from "nextjs-toploader";
-import { useSession, signOut } from "next-auth/react";
 
 export default function Home() {
   const [dropdown, setDropdown] = useState(false);
   const [generate, setGenerate] = useState(false);
   const { data: session } = useSession();
+  const [copied, setCopied] = useState(false);
 
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
@@ -16,6 +17,19 @@ export default function Home() {
   const openDropdown = useCallback(() => {
     setDropdown((prevState) => !prevState);
   }, []);
+
+  const toggleCopy = () => {
+    const copyButton = document.getElementById("default-message");
+    const copiedButton = document.getElementById("success-message");
+    copyButton.classList.add("hidden");
+    copiedButton.classList.remove("hidden");
+    setCopied(true);
+    setTimeout(() => {
+      copyButton.classList.remove("hidden");
+      copiedButton.classList.add("hidden");
+      setCopied(false);
+    }, 3000);
+  };
 
   const toggleModal = () => {
     const modal = document.getElementById("authentication-modal");
@@ -87,6 +101,9 @@ export default function Home() {
             <div className="p-4 md:p-5">
               <form className="space-y-4" action="#">
                 <button
+                  onClick={() => {
+                    signIn("google");
+                  }}
                   type="button"
                   class="text-white w-full bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 me-2 mb-2"
                 >
@@ -106,6 +123,9 @@ export default function Home() {
                   Sign in with Google
                 </button>
                 <button
+                  onClick={() => {
+                    signIn("github");
+                  }}
                   type="button"
                   class="text-white w-full bg-[#24292F] hover:bg-[#24292F]/90 focus:ring-4 focus:outline-none focus:ring-[#24292F]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-500 dark:hover:bg-[#050708]/30 me-2 mb-2"
                 >
@@ -130,7 +150,10 @@ export default function Home() {
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-300">
                       Custom login ?
                     </p>
-                    <a href="/login" className="text-sm font-medium ml-3 text-blue-700 hover:underline dark:text-blue-500">
+                    <a
+                      href="/login"
+                      className="text-sm font-medium ml-2 text-blue-700 hover:underline dark:text-blue-500"
+                    >
                       Login
                     </a>
                   </div>
@@ -261,7 +284,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/stats"
                   className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
                 >
                   Stats
@@ -323,9 +346,16 @@ export default function Home() {
             >
               <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
             </svg>
-            <span className="text-xs font-semibold">Copy</span>
+            <span onClick={toggleCopy} className="text-xs font-semibold">
+              Copy
+            </span>
           </span>
-          <span id="success-message" className="hidden items-center">
+          <span
+            id="success-message"
+            className={
+              !copied ? "hidden items-center" : "inline-flex items-center"
+            }
+          >
             <svg
               className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
               aria-hidden="true"
