@@ -68,12 +68,11 @@ const transporter = nodemailer.createTransport({
 });
 
 function isPasswordComplex(password) {
-  // Regular expressions to match uppercase letter, numeric digit, and special character
+
   const uppercaseRegex = /[A-Z]/;
   const numericRegex = /[0-9]/;
   const specialCharRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
 
-  // Check if password meets all complexity requirements
   return (
     uppercaseRegex.test(password) &&
     numericRegex.test(password) &&
