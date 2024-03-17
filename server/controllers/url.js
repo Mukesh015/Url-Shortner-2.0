@@ -21,7 +21,6 @@ async function handleGenerateNewShortURL(req, res) {
     const shortId = shortid();
     const qr_png = qr.imageSync(`http://localhost:8010/${shortId}`, { type: 'png' });
 
-    // Upload QR code image to Cloudinary
     cloudinary.uploader.upload_stream({
         resource_type: 'image',
         folder: 'qr_codes'
@@ -32,8 +31,6 @@ async function handleGenerateNewShortURL(req, res) {
         }
 
         const qrCodeUrl = result.secure_url;
-
-        // Create a new URL object
         const newUrl = new URL({
             shortId: shortId,
             redirectURL: body.url,
@@ -41,7 +38,6 @@ async function handleGenerateNewShortURL(req, res) {
         });
 
         try {
-            // Save the new URL object
             await newUrl.save();
             return res.json({ id: shortId });
         } catch (error) {
