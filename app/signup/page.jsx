@@ -1,5 +1,80 @@
 "use client";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
 export default function Register() {
+  const [username, setuserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [avatar, setAvatar] = useState(null);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(true);
+  const router = useRouter();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('profile', avatar);
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('password', password);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/register`, {
+        method: "POST",
+
+        body: formData,
+      
+      });
+      const data = await response.json();
+      if (response.statusCode === 400) {
+        console.log(data)
+        toast.error("Choose a strong password", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        throw new Error("User registration failed, Password encryption failed");
+      }
+      else if(!response.ok){
+        console.log(data)
+        toast.error("User Registration failed", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        throw new Error("User registration failed");
+      }
+      else if(data.status === "success"){
+        document.cookie = `cookie-1 = ${data.token}`;
+        toast.success("User Registration success", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      }
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
+    } catch (error) {
+      console.error("Server error", error);
+    }
+  };
 
   return (
     <div className="font-[sans-serif] bg-white text-white md:h-screen">
@@ -27,6 +102,7 @@ export default function Register() {
                   required
                   className="w-full bg-transparent text-sm border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none"
                   placeholder="Enter name"
+                  onChange={(e) => setuserName(e.target.value)}
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -90,10 +166,11 @@ export default function Register() {
               <div className="relative flex items-center">
                 <input
                   name="password"
-                  type="password"
+                  type={showPassword ? "password" : "text"}
                   required
                   className="w-full bg-transparent text-sm border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none"
                   placeholder="Enter password"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +178,7 @@ export default function Register() {
                   stroke="#bbb"
                   className="w-[18px] h-[18px] absolute right-2 cursor-pointer"
                   viewBox="0 0 128 128"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   <path
                     d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
@@ -120,6 +198,7 @@ export default function Register() {
             </div>
             <div className="mt-12">
               <button
+                onClick={handleRegister}
                 type="button"
                 className="w-max shadow-xl py-2.5 px-8 text-sm font-semibold rounded-md bg-transparent text-yellow-400 border border-yellow-400 focus:outline-none"
               >

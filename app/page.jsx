@@ -336,7 +336,11 @@ export default function Home() {
           https://github/facebook/react/blob/master
         </p>
         <button className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border">
-          <span onClick={toggleCopy} id="default-message" className="inline-flex items-center">
+          <span
+            onClick={toggleCopy}
+            id="default-message"
+            className="inline-flex items-center"
+          >
             <svg
               className="w-3 h-3 me-1.5"
               aria-hidden="true"
@@ -346,9 +350,7 @@ export default function Home() {
             >
               <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
             </svg>
-            <span className="text-xs font-semibold">
-              Copy
-            </span>
+            <span className="text-xs font-semibold">Copy</span>
           </span>
           <span
             id="success-message"
