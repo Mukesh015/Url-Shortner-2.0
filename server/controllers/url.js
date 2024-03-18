@@ -1,7 +1,7 @@
 const shortid = require("shortid");
 const qr = require('qr-image');
 const fs = require('fs');
-const URL = require("../models/url");
+const {URL} = require("../models/url");
 const cloudinary = require("cloudinary").v2;
 const dotenv = require("dotenv");
 dotenv.config({ path: "../.env" });
@@ -19,7 +19,7 @@ async function handleGenerateNewShortURL(req, res) {
     if (!body.url) return res.status(400).json({ error: "url is required" });
 
     const shortId = shortid();
-    const qr_png = qr.imageSync(`http://localhost:8010/${shortId}`, { type: 'png' });
+    const qr_png = qr.imageSync(`http://localhost:8010/redirect/${shortId}`, { type: 'png' });
 
     cloudinary.uploader.upload_stream({
         resource_type: 'image',

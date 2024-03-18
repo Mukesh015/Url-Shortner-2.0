@@ -59,15 +59,8 @@ async function register(req, res) {
       if (req.file && req.file.path) {
         // Upload image to cloudinary
     
-      cloudinary.uploader.upload(req.file.path, async function (err, result) {
-        if (err) {
-          console.error("Cloudinary upload failed:", err);
-          return res
-            .status(500)
-            .json({ message: "Cloudinary upload failed", error: err });
-        }
-        avatar = result.url;
-      });
+        const result = await cloudinary.uploader.upload(req.file.path);
+        avatar = result.url; // Set avatarUrl to the uploaded image URL
     }
     } catch {
       throw new Error("No profile picture found, setup failed.");

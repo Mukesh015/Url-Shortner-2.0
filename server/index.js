@@ -5,7 +5,7 @@ const router = require("./routes/url");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const {URL,UserModel} = require("./models/url");
+const { URL, UserModel } = require("./models/url");
 
 dotenv.config({ path: "../.env" });
 const app = express();
@@ -24,6 +24,24 @@ mongoose
   .catch((error) => {
     console.error("Database connection failed", error);
   });
+
+app.get("/redirect/:shortId", async (req, res) => {
+  const shortId = req.params.shortId;
+  const entry = await URL.findOneAndUpdate(
+    {
+      shortId,
+    },
+    {
+      $push: {
+        visitHistory: {
+          timestamp: Date.now(),
+        },
+      },
+    }
+  );
+  res.redirect(entry.redirectURL);
+});
+
 app.use("/", router);
 app.listen(PORT, () => {
   console.log(`Server listening from http://localhost:${PORT}`);
