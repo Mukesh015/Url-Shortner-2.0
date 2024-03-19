@@ -14,10 +14,12 @@ const {
   generateOtp,
   otpValidation,
   resetPassword,
+  handleuservalidation
 } = require("../controllers/auth");
 const router = express.Router();
 
 router.post("/", handleGenerateNewShortURL);
+router.post("/validateuser",handleuservalidation)
 router.get("/getanalytics/:shortId", getAnalytics);
 router.post("/login", login);
 router.get("/welcome", welcome);

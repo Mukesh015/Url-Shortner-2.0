@@ -58,10 +58,10 @@ async function register(req, res) {
     try {
       if (req.file && req.file.path) {
         // Upload image to cloudinary
-    
+
         const result = await cloudinary.uploader.upload(req.file.path);
         avatar = result.url; // Set avatarUrl to the uploaded image URL
-    }
+      }
     } catch {
       throw new Error("No profile picture found, setup failed.");
     }
@@ -86,7 +86,6 @@ async function welcome(req, res) {
 
 async function decodeJWT(req, res) {
   const token = req.body.token;
-  console.log("try to extract email");
   if (!token) {
     return res.status(400).json({ error: "Token not provided" });
   }
@@ -163,15 +162,36 @@ async function otpValidation(req, res) {
 
 async function resetPassword(req, res) {
   const { email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await UserModel.findOneAndUpdate(
     { email: email },
-    { $set: { password: password } },
+    { $set: { password: hashedPassword } },
     { new: true }
   );
   if (user) {
     res.status(201).send({ message: "Password reseted" });
   } else {
     res.status(502).send("password reset process failed");
+  }
+}
+async function handleuservalidation(req, res) {
+  const { email, name } = req.body;
+
+  try {
+    const existingUser = await UserModel.findOne({ email });
+
+    if (existingUser) {
+      // User with this email already exists
+      res.status(200).send({ message: "User already exists" });
+    } else {
+      // User does not exist, save the new user
+      const newUser = new UserModel({ email: email, name: name });
+      await newUser.save();
+      res.status(201).send({ message: "User saved successfully" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 }
 
@@ -183,4 +203,5 @@ module.exports = {
   otpValidation,
   register,
   resetPassword,
+  handleuservalidation,
 };

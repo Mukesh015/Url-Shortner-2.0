@@ -6,7 +6,6 @@ import { toast, ToastContainer } from "react-toastify";
 import cookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import "dotenv";
-import { set } from "mongoose";
 
 export default function Login() {
   const router = useRouter();
