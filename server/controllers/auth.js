@@ -185,7 +185,7 @@ async function handleuservalidation(req, res) {
       res.status(200).send({ message: "User already exists" });
     } else {
       // User does not exist, save the new user
-      const newUser = new UserModel({ email: email, name: name });
+      const newUser = new UserModel({ email: email, username: name });
       await newUser.save();
       res.status(201).send({ message: "User saved successfully" });
     }

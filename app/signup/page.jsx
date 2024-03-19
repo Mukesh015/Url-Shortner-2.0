@@ -13,22 +13,28 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (username === "" || password === "" || email === "") {
+      alert("Please fill in all fields");
+      return false;
+    }
     const formData = new FormData();
-    formData.append('profile', avatar);
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('password', password);
+    formData.append("profile", avatar);
+    formData.append("username", username);
+    formData.append("email", email);
+    formData.append("password", password);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/register`, {
-        method: "POST",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/register`,
+        {
+          method: "POST",
 
-        body: formData,
-      
-      });
+          body: formData,
+        }
+      );
       const data = await response.json();
       if (response.statusCode === 400) {
-        console.log(data)
+        console.log(data);
         toast.error("Choose a strong password", {
           position: "top-center",
           autoClose: 2000,
@@ -40,9 +46,8 @@ export default function Register() {
           theme: "dark",
         });
         throw new Error("User registration failed, Password encryption failed");
-      }
-      else if(!response.ok){
-        console.log(data)
+      } else if (!response.ok) {
+        console.log(data);
         toast.error("User Registration failed", {
           position: "top-center",
           autoClose: 2000,
@@ -54,8 +59,7 @@ export default function Register() {
           theme: "dark",
         });
         throw new Error("User registration failed");
-      }
-      else if(data.status === "success"){
+      } else if (data.status === "success") {
         document.cookie = `cookie-1 = ${data.token}`;
         toast.success("User Registration success", {
           position: "top-center",
@@ -191,7 +195,8 @@ export default function Register() {
               <label className="block">
                 <span className="text-xs">Choose your profile photo</span>
                 <input
-                   type="file"  onChange={(e)=>setAvatar(e.target.files[0])}
+                  type="file"
+                  onChange={(e) => setAvatar(e.target.files[0])}
                   className="mt-3 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                 />
               </label>

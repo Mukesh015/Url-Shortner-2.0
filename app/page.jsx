@@ -77,12 +77,13 @@ export default function Home() {
         }
       );
       if (response.ok) {
-        console.log("User details sent successfully");
+        const data = await response.json();
+        console.log("User details sent successfully", data);
       } else {
-        console.log("User details can't not sent");
+        console.log("User details can't not sent", data);
       }
     } catch {
-      console.log("Sending user details failed server error", error);
+      console.log("Sending user details failed server error");
     }
   }, [email, name]);
 
