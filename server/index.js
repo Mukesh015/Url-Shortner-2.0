@@ -27,19 +27,30 @@ mongoose
 
 app.get("/redirect/:shortId", async (req, res) => {
   const shortId = req.params.shortId;
-  const entry = await URL.findOneAndUpdate(
-    {
-      shortId,
-    },
-    {
-      $push: {
-        visitHistory: {
-          timestamp: Date.now(),
-        },
+
+  try {
+    const entry = await UserModel.findOneAndUpdate(
+      {
+        shortId: shortId,
       },
+      {
+        $push: {
+          visitHistory: {
+            timestamp: Date.now(),
+          },
+        },
+      }
+    );
+
+    if (!entry) {
+      return res.status(404).json({ error: "URL not found" });
     }
-  );
-  res.redirect(entry.redirectURL);
+
+    res.redirect(entry.redirectURL);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.use("/", router);

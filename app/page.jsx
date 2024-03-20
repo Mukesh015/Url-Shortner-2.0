@@ -11,10 +11,20 @@ export default function Home() {
   const [dropdown, setDropdown] = useState(false);
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState(null);
+  const [shortUrl, setShortUrl] = useState([]);
+  const [copiedUrl, setCopiedUrl] = useState(null);
 
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
+
+  const handleCopy = (url) => {
+    navigator.clipboard.writeText(url);
+    setCopiedUrl(url);
+    setTimeout(() => {
+      setCopiedUrl(null);
+    }, 2000);
+  };
 
   const openDropdown = useCallback(() => {
     setDropdown((prevState) => !prevState);
@@ -49,6 +59,7 @@ export default function Home() {
         });
         throw new Error("Url Shortning failed");
       } else {
+        const data = await response.json();
         toast.success("Successfully generated", {
           position: "top-right",
           autoClose: 2000,
@@ -58,11 +69,12 @@ export default function Home() {
           draggable: true,
           theme: "dark",
         });
+        setShortUrl((prevShortUrlList) => [...prevShortUrlList, data.shorturl]);
       }
     } catch (error) {
-      console.error("Server", error);
+      console.error("Server error", error);
     }
-  }, [url]);
+  }, [shortUrl, url]);
 
   const sendUserDetails = useCallback(async () => {
     try {
@@ -152,12 +164,9 @@ export default function Home() {
   }, [session]);
 
   useEffect(() => {
-    sendUserDetails();
-  }, [email, name]);
-
-  useEffect(() => {
     getDetails();
-  }, []);
+    sendUserDetails();
+  }, [sendUserDetails, getDetails, shortUrl]);
 
   return (
     <>
@@ -434,8 +443,7 @@ export default function Home() {
             </div>
             <div className="flex">
               <input
-                type="search"
-                id="default-search"
+                type="url"
                 className="block w-full p-4 ps-10 mr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Paste a link here..."
                 required
@@ -452,54 +460,71 @@ export default function Home() {
           </div>
         </form>
       </div>
-      <div className="border rounded-md flex max-w-3xl mt-16 ml-96 min-h-40 max-h-80 bg-slate-700">
-        <p className="p-3 text-gray-300">
-          https://github/facebook/react/blob/master
-        </p>
-        <button className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border">
-          <span
-            onClick={toggleCopy}
-            id="default-message"
-            className="inline-flex items-center"
-          >
-            <svg
-              className="w-3 h-3 me-1.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 18 20"
-            >
-              <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
-            </svg>
-            <span className="text-xs font-semibold">Copy</span>
-          </span>
-          <span
-            id="success-message"
-            className={
-              !copied ? "hidden items-center" : "inline-flex items-center"
-            }
-          >
-            <svg
-              className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span className="text-xs font-semibold text-blue-700 dark:text-blue-500">
-              Copied
-            </span>
-          </span>
-        </button>
+
+      <div className="border rounded-md max-w-3xl mt-16 ml-96 min-h-40 max-h-80 bg-slate-700">
+        {shortUrl.length > 0 ? (
+          shortUrl.slice(-3).map((url, index) => (
+            <div key={index} className="flex items-center">
+              <p className="p-3 text-gray-400">{url}</p>
+              {copiedUrl === url ? (
+                <button
+                  className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border"
+                  onClick={() => handleCopy(url)}
+                >
+                  <span
+                    className={
+                      copied
+                        ? "hidden items-center"
+                        : "inline-flex items-center"
+                    }
+                  >
+                    <svg
+                      className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 16 12"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M1 5.917 5.724 10.5 15 1.5"
+                      />
+                    </svg>
+
+                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-500">
+                      Copied
+                    </span>
+                  </span>
+                </button>
+              ) : (
+                <button
+                  className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border"
+                  onClick={() => handleCopy(url)}
+                >
+                  <span className="inline-flex items-center">
+                    <svg
+                      className="w-3 h-3 me-1.5"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 18 20"
+                    >
+                      <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
+                    </svg>
+                    <span className="text-xs font-semibold">Copy</span>
+                  </span>
+                </button>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="p-3 text-gray-400">No records found</p>
+        )}
       </div>
+
       <div className="flex mt-40 items-center justify-center">
         <div className="mr-10">
           <img

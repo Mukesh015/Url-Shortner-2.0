@@ -10,12 +10,20 @@ import Cookies from "js-cookie";
 export default function Home() {
   const { data: session } = useSession();
 
+  // const [copiedUrl, setCopiedUrl] = useState("");
   const [dropdown, setDropdown] = useState(false);
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
   const [copied, setCopied] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [data, setData] = useState(null);
+
+  // const handleCopy = (shortUrl) => {
+  //   navigator.clipboard.writeText(shortUrl);
+  //   setCopiedUrl(shortUrl);
+  //   setTimeout(() => setCopiedUrl(''), 2000); // Reset copied URL after 2 seconds
+  // };
 
   const openDeletePopup = useCallback(() => {
     setDeletePopup((prevState) => !prevState);
@@ -43,6 +51,27 @@ export default function Home() {
     }, 3000);
   };
 
+  const getUrls = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:8010/geturl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        console.log("Fetching failed");
+      } else {
+        const Data = await response.json();
+        setData(Data);
+        console.log(data);
+      }
+    } catch {
+      console.log("Fetching failed, server error");
+    }
+  }, [email]);
+
   const getDetails = useCallback(async () => {
     try {
       const token = cookie.get("cookie-1");
@@ -67,7 +96,7 @@ export default function Home() {
     } catch (error) {
       console.error("Server", error);
     }
-  }, []);
+  }, [email, name, imgurl]);
 
   useEffect(() => {
     if (session && session.user && session.user.image) {
@@ -79,7 +108,12 @@ export default function Home() {
 
   useEffect(() => {
     getDetails();
-  }, []);
+    getUrls();
+  }, [getDetails, getUrls]);
+
+  useEffect(() => {
+    console.log("Page rerendering...", data);
+  }, [data]);
 
   return (
     <>
@@ -383,118 +417,124 @@ export default function Home() {
             />
           </div>
         </div>
-        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" className="px-6 py-3">
-                original url
-              </th>
-              <th scope="col" className="px-6 py-3">
-                short url
-              </th>
-              <th scope="col" className="px-6 py-3">
-                qr code
-              </th>
-              <th scope="col" className="px-6 py-3">
-                created at
-              </th>
-              <th scope="col" className="px-6 py-3">
-                clicks
-              </th>
-              <th scope="col" className="px-20 py-3">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* First row */}
-            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-blue-500 hover:underline hover:cursor-pointer"
-              >
-                https://www.youtube.com
-              </th>
-              <td className="px-6 py-4 dark:text-blue-500 hover:underline cursor-pointer">
-                https://bit-ly/jfkih
-              </td>
-              <td className="px-8 py-4">None</td>
-              <td className="px-6 py-4">12/07/2024</td>
-              <td className="px-10 py-4">2</td>
-              <td className="px-6 py-4">
-                <button
-                  className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border"
-                  type="button"
+        {data ? (
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" className="px-6 py-3">
+                  Original URL
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Short URL
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  QR Code
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Created At
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Clicks
+                </th>
+                <th scope="col" className="px-20 py-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.shortId.map((shortId, index) => (
+                <tr
+                  key={shortId}
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                 >
-                  <span
-                    onClick={toggleCopy}
-                    id="default-message"
-                    className="inline-flex items-center"
-                  >
-                    <svg
-                      className="w-3 h-3 me-1.5"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 20"
-                    >
-                      <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
-                    </svg>
-                    <span className="text-xs font-semibold">Copy</span>
-                  </span>
-                  <span
-                    id="success-message"
-                    className={
-                      !copied
-                        ? "hidden items-center"
-                        : "inline-flex items-center"
-                    }
-                  >
-                    <svg
-                      className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 16 12"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M1 5.917 5.724 10.5 15 1.5"
-                      />
-                    </svg>
-                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-500">
-                      Copied
-                    </span>
-                  </span>
-                </button>
-                <button
-                  className="mt-2  text-gray-900 h-fit dark:text-gray-400 dark:bg-gray-800 hover:text-white text-xs rounded-lg py-2 px-2.5 inline-flex font-semibold ml-3 items-center justify-center bg-white border-gray-500 border hover:bg-red-500"
-                  onClick={openDeletePopup}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 me-1.5"
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  <td className="px-6 py-4">{data.redirectURL[index]}</td>
+                  <td className="px-6 py-4">{`https://yourdomain.com/${shortId}`}</td>
+                  <td className="px-6 py-4">
+                    <img
+                      src={data.qrCodeUrl[index]}
+                      alt={`QR Code for ${shortId}`}
+                      className="w-8 h-8"
                     />
-                  </svg>
-                  Delete
-                </button>
-              </td>
-            </tr>
-            {/* More rows can be added here */}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="px-6 py-4">10/12/2024</td>
+                  <td className="px-6 py-4">97</td>
+                  <td className="px-6 py-4">
+                    <button
+                      className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border"
+                      type="button"
+                    >
+                      <span
+                        onClick={toggleCopy}
+                        id="default-message"
+                        className="inline-flex items-center"
+                      >
+                        <svg
+                          className="w-3 h-3 me-1.5"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 18 20"
+                        >
+                          <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
+                        </svg>
+                        <span className="text-xs font-semibold">Copy</span>
+                      </span>
+                      <span
+                        id="success-message"
+                        className={
+                          !copied
+                            ? "hidden items-center"
+                            : "inline-flex items-center"
+                        }
+                      >
+                        <svg
+                          className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 16 12"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M1 5.917 5.724 10.5 15 1.5"
+                          />
+                        </svg>
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-500">
+                          Copied
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      className="mt-2  text-gray-900 h-fit dark:text-gray-400 dark:bg-gray-800 hover:text-white text-xs rounded-lg py-2 px-2.5 inline-flex font-semibold ml-3 items-center justify-center bg-white border-gray-500 border hover:bg-red-500"
+                      onClick={openDeletePopup}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 me-1.5"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="p-3 text-gray-400">No records found</p>
+        )}
       </div>
 
       <footer className="bg-white rounded-lg mt-96 shadow dark:bg-gray-900 ">

@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: false,
     },
     email: {
       type: String,
@@ -42,6 +42,20 @@ const UserSchema = new mongoose.Schema(
       required: false,
       type: Number,
     },
+    shortId: {
+      type: Array,
+      required: false,
+      unique: true,
+    },
+    redirectURL: {
+      type: Array,
+      required: false,
+    },
+    qrCodeUrl: {
+      type: Array,
+      required: false,
+    },
+    visitHistory: [[{ timestamp: { type: Number } }]],
   },
   {
     timestamps: true,
