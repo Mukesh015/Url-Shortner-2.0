@@ -21,34 +21,54 @@ export default function Stats() {
   const [qrcode, setQrcode] = useState(null);
   const [deleteUrl, setDeleteUrl] = useState(null);
   const [downloadQrCode, setdownloadQrCode] = useState(false);
+  const [dateDropDown, setDateDropDown] = useState(false);
 
-  const handleQrDownload = useCallback((qrcode) => {}, []);
-
-  const openDeletePopup = useCallback((url) => {
-    setDeleteUrl(url);
-    setDeletePopup((prevState) => !prevState);
+  const handleDateDropdown = useCallback(() => {
+    setDateDropDown((prevState) => !prevState);
   }, []);
 
   const handleredirect = useCallback((url) => {
     window.open(url, "_blank");
   }, []);
 
+  const openDropdown = useCallback(() => {
+    setDropdown((prevState) => !prevState);
+  }, []);
+
+  const openDeletePopup = useCallback((url) => {
+    setDeleteUrl(url);
+    setDeletePopup((prevState) => !prevState);
+  }, []);
+
   const openQRPopup = useCallback((qrcode) => {
     setQrcode(qrcode);
     setQRPopup((prevState) => !prevState);
-    handleQrDownload(qrcode);
-    if (downloadQrCode) {
-    }
-  }, []);
-
-  const openDropdown = useCallback(() => {
-    setDropdown((prevState) => !prevState);
   }, []);
 
   const logout = async () => {
     Cookies.remove("cookie-1");
     router.push("/");
   };
+
+  const handledownloadQrCode = useCallback(async () => {
+    try {
+      const response = await fetch(qrcode);
+      if (!response.ok) {
+        throw new Error("Failed to fetch image");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "image.jpg";
+      link.click();
+
+      URL.revokeObjectURL(url);
+      setdownloadQrCode(true);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    }
+  }, [qrcode, setdownloadQrCode]);
 
   const deleteShortUrl = useCallback(async () => {
     console.log(deleteUrl);
@@ -144,6 +164,48 @@ export default function Stats() {
       console.error("Server", error);
     }
   }, [email, name, imgurl]);
+
+  const filterDays = useCallback(
+    async (days) => {
+      handleDateDropdown();
+      const milliseconds = days * 24 * 60 * 60 * 1000; // Convert days to milliseconds
+      const currentTime = Date.now();
+      const filteredIndexes = [];
+      const modifiedData = {};
+
+      for (let i = 0; i < data.createdat.length; i++) {
+        if (currentTime - data.createdat[i] < milliseconds) {
+          filteredIndexes.push(i);
+        }
+      }
+
+      // Push filtered data into modifiedData object
+      modifiedData.shortId = filteredIndexes.map(
+        (index) => data.shortId[index]
+      );
+      modifiedData.qrCodeUrl = filteredIndexes.map(
+        (index) => data.qrCodeUrl[index]
+      );
+      modifiedData.redirectURL = filteredIndexes.map(
+        (index) => data.redirectURL[index]
+      );
+      modifiedData.formattedCreatedAt = filteredIndexes.map(
+        (index) => data.formattedCreatedAt[index]
+      );
+
+      // Convert shortIdCounts array to object
+      modifiedData.shortIdCounts = { ...data.shortIdCounts }; // Copy previous value
+      filteredIndexes.forEach((index) => {
+        const shortId = data.shortId[index];
+        modifiedData.shortIdCounts[shortId] =
+          modifiedData.shortIdCounts[shortId] || 0;
+      });
+      setData(modifiedData);
+      console.log("Filtered indexes:", filteredIndexes);
+      console.log("Modified data:", modifiedData);
+    },
+    [data]
+  );
 
   useEffect(() => {
     if (session && session.user && session.user.image) {
@@ -366,7 +428,7 @@ export default function Stats() {
       )}
       {QRPopup && (
         <div className="fixed inset-0 p-4  flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
-          <div className="w-full max-w-md shadow-lg rounded-md p-6 dark:bg-gray-300  relative">
+          <div className="w-full max-w-md shadow-lg rounded-md p-6 dark:bg-slate-800  relative">
             <svg
               onClick={openQRPopup}
               xmlns="http://www.w3.org/2000/svg"
@@ -387,7 +449,7 @@ export default function Stats() {
             </div>
             <div className="flex flex-col space-y-2">
               <button
-                onClick={() => setdownloadQrCode(true)}
+                onClick={() => handledownloadQrCode()}
                 type="button"
                 className="px-6 py-2.5 rounded-md text-black text-sm font-semibold border-none outline-none bg-gray-200 hover:bg-green-500 hover:text-white active:bg-gray-200"
               >
@@ -402,74 +464,63 @@ export default function Stats() {
         <div className="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
           <div>
             <button
-              id="dropdownRadioButton"
-              data-dropdown-toggle="dropdownRadio"
-              className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+              onClick={handleDateDropdown}
+              id="hs-dropdown-default"
               type="button"
+              className="hs-dropdown-toggle py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
             >
+              All
               <svg
-                className="w-3 h-3 text-gray-500 dark:text-gray-400 me-3"
-                aria-hidden="true"
+                className="hs-dropdown-open:rotate-180 size-4"
                 xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
-              </svg>
-              Last 30 days
-              <svg
-                className="w-2.5 h-2.5 ms-2.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
                 fill="none"
-                viewBox="0 0 10 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 1 4 4 4-4"
-                />
+                <path d="m6 9 6 6 6-6" />
               </svg>
             </button>
             {/* Dropdown menu */}
-            <div
-              id="dropdownRadio"
-              className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
-              data-popper-reference-hidden=""
-              data-popper-escaped=""
-              data-popper-placement="top"
-              style={{
-                position: "absolute",
-                inset: "auto auto 0px 0px",
-                margin: "0px",
-                transform: "translate3d(522.5px, 3847.5px, 0px)",
-              }}
-            >
-              <ul
-                className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-                aria-labelledby="dropdownRadioButton"
+            {dateDropDown && (
+              <div
+                className="fixed hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-1 min-w-60 bg-white shadow-md rounded-lg p-2 mt-2 dark:bg-gray-800 dark:border dark:border-gray-700 dark:divide-gray-700 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full"
+                aria-labelledby="hs-dropdown-default"
               >
-                <li>
-                  <div className="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <input
-                      id="filter-radio-example-1"
-                      type="radio"
-                      value=""
-                      name="filter-radio"
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label
-                      htmlFor="filter-radio-example-1"
-                      className="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300"
-                    >
-                      Last day
-                    </label>
-                  </div>
-                </li>
-              </ul>
-            </div>
+                <a
+                  onClick={() => window.location.reload()}
+                  className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-gray-100 focus:outline-none focus:bg-gray-100  dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
+                  href="#"
+                >
+                  All
+                </a>
+                <a
+                  onClick={() => filterDays(2)}
+                  className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
+                  href="#"
+                >
+                  Yesterday
+                </a>
+                <a
+                  onClick={() => filterDays(7)}
+                  className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
+                  href="#"
+                >
+                  Last week
+                </a>
+                <a
+                  onClick={() => filterDays(30)}
+                  className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
+                  href="#"
+                >
+                  This month
+                </a>
+              </div>
+            )}
           </div>
           <label htmlFor="table-search" className="sr-only">
             Search
@@ -493,7 +544,7 @@ export default function Stats() {
             <input
               type="text"
               id="table-search"
-              className="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="block p-2 ps-10 cursor-not-allowed text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search for items"
             />
           </div>
@@ -602,10 +653,10 @@ export default function Stats() {
                         <span className="text-xs font-semibold">Copy</span>
                       </span>
                       <span
-                        id={`success-message-${shortId}`} // Add shortId to id
+                        id={`success-message-${shortId}`}
                         className={`inline-flex items-center ${
                           !copied ? "hidden" : ""
-                        }`} // Check copied state
+                        }`}
                       >
                         <svg
                           className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
@@ -657,7 +708,7 @@ export default function Stats() {
         )}
       </div>
 
-      <footer className="bg-white rounded-lg mt-96 shadow dark:bg-gray-900 ">
+      <footer className="bg-white rounded-lg mt-72 shadow dark:bg-gray-900 ">
         <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
           <div className="sm:flex sm:items-center sm:justify-between">
             <a

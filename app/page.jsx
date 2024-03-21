@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import NextTopLoader from "nextjs-toploader";
 import cookie from "js-cookie";
 import Cookies from "js-cookie";
+import Link from "next/link";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -13,7 +14,6 @@ export default function Home() {
   const [url, setUrl] = useState(null);
   const [shortUrl, setShortUrl] = useState([]);
   const [copiedUrl, setCopiedUrl] = useState(null);
-
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
@@ -153,7 +153,7 @@ export default function Home() {
   useEffect(() => {
     getDetails();
     sendUserDetails();
-  }, [sendUserDetails, getDetails, shortUrl,imgurl]);
+  }, [sendUserDetails, getDetails, shortUrl, imgurl]);
 
   return (
     <>
@@ -513,68 +513,160 @@ export default function Home() {
           <p className="p-3 text-gray-400">No records found</p>
         )}
       </div>
+      <div className="ml-96 mt-3 flex">
+        <svg
+        className="m-1"
+          xmlns="http://www.w3.org/2000/svg"
+          height="18px"
+          viewBox="0 0 24 24"
+          width="18px"
+          fill="#FFFFFF"
+        >
+          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+        </svg>
 
-      <div className="flex mt-40 items-center justify-center">
-        <div className="mr-10">
-          <img
-            className="h-20 ml-16 rounded-full"
-            src="https://png.pngtree.com/png-clipart/20210309/original/pngtree-thumbs-up-icon-png-image_5820943.jpg"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-20">Easy</h3>
-          <p className="text-slate-500"> ShortURL is easy and fast,</p>
+        <p className="text-red-500 font-semibold">Alert:</p>
+        <span className="text-gray-400 ml-1">
+          The most recent abbreviated URL will appear just below the most recent
+          one.
+        </span>
+      </div>
+
+      <div className="max-w-3xl ml-96 mt-20">
+        <h1 className="font-bold text-2xl mb-3">
+          Simple and fast URL shortener !
+        </h1>
+        <p className="font-semibold text-slate-500 mb-6">
+          ShortURL allows to shorten long links from
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            Instagram
+          </span>
+          ,{" "}
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            Facebook
+          </span>
+          ,{" "}
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            YouTube
+          </span>
+          ,{" "}
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            Twitter
+          </span>
+          ,{" "}
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            Linked In
+          </span>
+          ,{" "}
+          <span className="text-blue-500 hover:underline cursor-pointer">
+            {" "}
+            WhatsApp
+          </span>
+          , TikTok, blogs and sites. Just paste the long URL and click the
+          Shorten URL button. On the next page, copy the shortened URL and share
+          it on sites, chat and emails. After shortening the URL, check how many
+          clicks it received.
+        </p>
+        <h1 className="font-bold text-2xl mb-3">Shorten, share and track</h1>
+        <p className="font-semibold text-slate-500">
+          Your shortened URLs can be used in publications, documents,
+          advertisements, blogs, forums, instant messages, and other locations.
+          Track statistics for your business and projects by monitoring the
+          number of hits from your URL with our click counter. For visit or
+          track you previous hits or shortened URLs
+          <Link href="/stats">
+            <span className="text-blue-500 hover:underline cursor-pointer">
+              {" "}
+              click here
+            </span>
+          </Link>
+          .
+        </p>
+      </div>
+
+      <div className="mt-20 items-center justify-center max-w-5xl ml-72">
+        <div className="flex mb-16">
+          <div className="mr-7">
+            <img
+              className="h-20 ml-24 rounded-full mb-3"
+              src="https://media.istockphoto.com/id/1359498219/vector/like-sign-with-green-leaves-in-circle-green-thumb-eco-friendly.jpg?s=612x612&w=0&k=20&c=TDA7kmwuzS7z8JwIJPRPVURDcEvi8n3mVVZ2nUGsDbI="
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold ml-28 mb-3">Easy</h3>
+            <p className="text-slate-500">
+              {" "}
+              ShortURL is easy and fast, enter the long link to get your
+              shortened link
+            </p>
+          </div>
+          <div className="mr-7">
+            <img
+              className="h-20 ml-14 mb-3 rounded-full"
+              src="https://support.rebrandly.com/hc/article_attachments/17527840087837"
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold pl-20 mb-3">Shortened</h3>
+            <p className="text-slate-500">
+              Use any link, no matter what size, ShortURL always shortens
+            </p>
+          </div>
+          <div>
+            <img
+              className="h-20 ml-28 mb-3 rounded-full"
+              src="https://img.freepik.com/free-vector/golden-badge-shield-with-gold-leaves_1017-30512.jpg?w=740&t=st=1711037970~exp=1711038570~hmac=3a6985396ebbbf1b9091856f69522d616a892f0ed178070510a153d2a4745497"
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold ml-32 mb-3">Secure</h3>
+            <p className="text-slate-500">
+              It is fast and secure, our service has HTTPS protocol and data
+              encryption
+            </p>
+          </div>
         </div>
-        <div className="mr-10">
-          <img
-            className="h-20 ml-20 rounded-full"
-            src="https://static.vecteezy.com/system/resources/previews/010/737/931/non_2x/broken-chain-icon-eps-10-free-vector.jpg"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-20">Shortened</h3>
-          <p className="text-slate-500">Use any link, no matter what size</p>
-        </div>
-        <div>
-          <img
-            className="h-20 ml-8 rounded-full"
-            src="https://png.pngtree.com/png-clipart/20191122/original/pngtree-shield-safe-line-icon-vector-png-image_5175136.jpg"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-10">Secure</h3>
-          <p className="text-slate-500">It is fast,secure and </p>
+        <div className="flex">
+          <div className="mr-10">
+            <img
+              className="h-20 ml-24 mb-3 rounded-full"
+              src="https://cdn-icons-png.freepik.com/512/432/432548.png"
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold ml-24 mb-3">Statistics</h3>
+            <p className="text-slate-500">
+              Check the number of clicks that your shortened URL received
+            </p>
+          </div>
+          <div className="mr-10">
+            <img
+              className="h-20 ml-24 mb-3 rounded-full"
+              src="https://cdn-icons-png.flaticon.com/512/8365/8365466.png"
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold pl-24 mb-3">Reliable</h3>
+            <p className="text-slate-500">
+              All links that try to disseminate spam, viruses and malware are
+              deleted
+            </p>
+            <p className="pl-5"></p>
+          </div>
+          <div>
+            <img
+              className="h-20 ml-10 mb-3 rounded-full"
+              src="https://www.iconbunny.com/icons/media/catalog/product/2/8/2858.12-connected-devices-icon-iconbunny.jpg"
+              alt="Statistics Icon"
+            />
+            <h3 className="font-bold ml-12 mb-3">Devices</h3>
+            <p className="text-slate-500">
+              Compatible with smartphones, tablets and desktop
+            </p>
+          </div>
         </div>
       </div>
-      <div className="flex mt-20 items-center justify-center">
-        <div className="mr-10">
-          <img
-            className="h-20 ml-16 rounded-full"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyGnUa_zixC3zGRhy4I1wRk0fDsRnfv3GEtg&usqp=CAU"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-16">Statistics</h3>
-          <p className="text-slate-500">Check the clicks of received</p>
-          <p className="pl-10 text-slate-500"> shortened URL </p>
-        </div>
-        <div className="mr-10">
-          <img
-            className="h-20 ml-28 rounded-full"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOTyE3OFA-N4n8MhAMrCRszqPHR-nWZ9nKxw&usqp=CAU"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-28">Reliable</h3>
-          <p className="text-slate-500">links that try to disseminate spam</p>
-          <p className="pl-5"></p>
-        </div>
-        <div>
-          <img
-            className="h-20 ml-10 rounded-full"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTahvC_1iXzH4ZmxuU5GMTJDpvOum4pBpHwzw&usqp=CAU"
-            alt="Statistics Icon"
-          />
-          <h3 className="font-bold pl-10">Devices</h3>
-          <p className="text-slate-500">Compatible with Devices</p>
-          {/* <p className="pl-10">tablets and desktop</p> */}
-        </div>
-      </div>
+
       <footer className="bg-white rounded-lg mt-40 shadow dark:bg-gray-900 ">
         <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
           <div className="sm:flex sm:items-center sm:justify-between">

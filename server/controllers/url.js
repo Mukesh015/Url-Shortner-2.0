@@ -145,12 +145,10 @@ async function deleteUrl(req, res) {
         updateOperation
       );
 
-      return res
-        .status(200)
-        .json({
-          message: "URL and corresponding data deleted successfully",
-          index: result.shortId.indexOf(shortId),
-        });
+      return res.status(200).json({
+        message: "URL and corresponding data deleted successfully",
+        index: result.shortId.indexOf(shortId),
+      });
     }
   } catch (error) {
     console.error("Error deleting URL and corresponding data:", error);
