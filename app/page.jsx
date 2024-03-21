@@ -44,7 +44,7 @@ export default function Home() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ url: url }),
+          body: JSON.stringify({ url: url, email: email }),
         }
       );
       if (!response.ok) {
@@ -74,7 +74,7 @@ export default function Home() {
     } catch (error) {
       console.error("Server error", error);
     }
-  }, [shortUrl, url]);
+  }, [shortUrl, url, email]);
 
   const sendUserDetails = useCallback(async () => {
     try {
@@ -98,19 +98,6 @@ export default function Home() {
       console.log("Sending user details failed server error");
     }
   }, [email, name]);
-
-  const toggleCopy = () => {
-    const copyButton = document.getElementById("default-message");
-    const copiedButton = document.getElementById("success-message");
-    copyButton.classList.add("hidden");
-    copiedButton.classList.remove("hidden");
-    setCopied(true);
-    setTimeout(() => {
-      copyButton.classList.remove("hidden");
-      copiedButton.classList.add("hidden");
-      setCopied(false);
-    }, 3000);
-  };
 
   const toggleModal = () => {
     const modal = document.getElementById("authentication-modal");
@@ -166,7 +153,7 @@ export default function Home() {
   useEffect(() => {
     getDetails();
     sendUserDetails();
-  }, [sendUserDetails, getDetails, shortUrl]);
+  }, [sendUserDetails, getDetails, shortUrl,imgurl]);
 
   return (
     <>
@@ -434,11 +421,13 @@ export default function Home() {
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                height="24"
-                viewBox="0 -960 960 960"
-                width="24"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                fill="#FFFFFF"
               >
-                <path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160v80ZM320-440v-80h320v80H320Zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280H520Z" />
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path d="M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z" />
               </svg>
             </div>
             <div className="flex">

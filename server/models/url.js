@@ -51,11 +51,15 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       required: false,
     },
+    createdat: {
+      type: Array,
+      required: false,
+    },
     qrCodeUrl: {
       type: Array,
       required: false,
     },
-    visitHistory: [[{ timestamp: { type: Number } }]],
+    visitHistory: [{ timestamp: { type: Number } ,shortId: { type: String}}],
   },
   {
     timestamps: true,

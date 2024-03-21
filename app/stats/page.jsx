@@ -7,10 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 import cookie from "js-cookie";
 import Cookies from "js-cookie";
 
-export default function Home() {
+export default function Stats() {
   const { data: session } = useSession();
 
-  // const [copiedUrl, setCopiedUrl] = useState("");
   const [dropdown, setDropdown] = useState(false);
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
@@ -18,15 +17,28 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
   const [data, setData] = useState(null);
+  const [QRPopup, setQRPopup] = useState(false);
+  const [qrcode, setQrcode] = useState(null);
+  const [deleteUrl, setDeleteUrl] = useState(null);
+  const [downloadQrCode, setdownloadQrCode] = useState(false);
 
-  // const handleCopy = (shortUrl) => {
-  //   navigator.clipboard.writeText(shortUrl);
-  //   setCopiedUrl(shortUrl);
-  //   setTimeout(() => setCopiedUrl(''), 2000); // Reset copied URL after 2 seconds
-  // };
+  const handleQrDownload = useCallback((qrcode) => {}, []);
 
-  const openDeletePopup = useCallback(() => {
+  const openDeletePopup = useCallback((url) => {
+    setDeleteUrl(url);
     setDeletePopup((prevState) => !prevState);
+  }, []);
+
+  const handleredirect = useCallback((url) => {
+    window.open(url, "_blank");
+  }, []);
+
+  const openQRPopup = useCallback((qrcode) => {
+    setQrcode(qrcode);
+    setQRPopup((prevState) => !prevState);
+    handleQrDownload(qrcode);
+    if (downloadQrCode) {
+    }
   }, []);
 
   const openDropdown = useCallback(() => {
@@ -38,16 +50,51 @@ export default function Home() {
     router.push("/");
   };
 
-  const toggleCopy = () => {
-    const copyButton = document.getElementById("default-message");
-    const copiedButton = document.getElementById("success-message");
+  const deleteShortUrl = useCallback(async () => {
+    console.log(deleteUrl);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/deleteurl/${deleteUrl}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        console.log("Failed to delete url: ", deleteUrl, data);
+      } else {
+        toast.success("Deleted successfully", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "dark",
+        });
+        setDeletePopup((prevState) => !prevState);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Server", error);
+    }
+  }, [email, deleteUrl, setDeletePopup]);
+
+  const toggleCopy = (shortId) => {
+    navigator.clipboard.writeText(`http://localhost:8010/redirect/${shortId}`);
+    const copyButton = document.getElementById(`default-message-${shortId}`);
+    const copiedButton = document.getElementById(`success-message-${shortId}`);
     copyButton.classList.add("hidden");
     copiedButton.classList.remove("hidden");
-    setCopied(true);
     setTimeout(() => {
       copyButton.classList.remove("hidden");
       copiedButton.classList.add("hidden");
-      setCopied(false);
     }, 3000);
   };
 
@@ -113,7 +160,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log("Page rerendering...", data);
-  }, [data]);
+  }, [data, deleteShortUrl]);
 
   return (
     <>
@@ -259,12 +306,12 @@ export default function Home() {
       </nav>
 
       {deletePopup && (
-        <div class="fixed inset-0 p-4  flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
-          <div class="w-full max-w-md shadow-lg rounded-md p-6 dark:bg-gray-700 relative">
+        <div className="fixed inset-0 p-4  flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+          <div className="w-full max-w-md shadow-lg rounded-md p-6 dark:bg-gray-700 relative">
             <svg
               onClick={openDeletePopup}
               xmlns="http://www.w3.org/2000/svg"
-              class="w-3.5 cursor-pointer shrink-0 fill-black hover:fill-red-500 float-right"
+              className="w-3.5 cursor-pointer shrink-0 fill-black hover:fill-red-500 float-right"
               viewBox="0 0 320.591 320.591"
             >
               <path
@@ -276,10 +323,10 @@ export default function Home() {
                 data-original="#000000"
               ></path>
             </svg>
-            <div class="my-8 text-center">
+            <div className="my-8 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-16 fill-red-500 inline"
+                className="w-16 fill-red-500 inline"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -298,8 +345,9 @@ export default function Home() {
                 Are you sure want to delete it ? These process is not reversible
               </p>
             </div>
-            <div class="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2">
               <button
+                onClick={deleteShortUrl}
                 type="button"
                 className="px-6 py-2.5 rounded-md text-white text-sm font-semibold border-none outline-none bg-red-500 hover:bg-red-600 active:bg-red-500"
               >
@@ -311,6 +359,39 @@ export default function Home() {
                 className="px-6 py-2.5 rounded-md text-black text-sm font-semibold border-none outline-none bg-gray-200 hover:bg-gray-300 active:bg-gray-200"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {QRPopup && (
+        <div className="fixed inset-0 p-4  flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+          <div className="w-full max-w-md shadow-lg rounded-md p-6 dark:bg-gray-300  relative">
+            <svg
+              onClick={openQRPopup}
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-3.5 cursor-pointer shrink-0 fill-black hover:fill-red-500 float-right"
+              viewBox="0 0 320.591 320.591"
+            >
+              <path
+                d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
+                data-original="#000000"
+              ></path>
+              <path
+                d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
+                data-original="#000000"
+              ></path>
+            </svg>
+            <div className="my-8 text-center">
+              <img className="h-60 ml-20" src={qrcode} alt="Qr Code" />
+            </div>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => setdownloadQrCode(true)}
+                type="button"
+                className="px-6 py-2.5 rounded-md text-black text-sm font-semibold border-none outline-none bg-gray-200 hover:bg-green-500 hover:text-white active:bg-gray-200"
+              >
+                Download
               </button>
             </div>
           </div>
@@ -447,25 +528,66 @@ export default function Home() {
                   key={shortId}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                 >
-                  <td className="px-6 py-4">{data.redirectURL[index]}</td>
-                  <td className="px-6 py-4">{`https://yourdomain.com/${shortId}`}</td>
+                  <td className="px-4 py-4">
+                    <div className="flex">
+                      <p className="mt-2">{data.redirectURL[index]}</p>
+                      <svg
+                        onClick={() =>
+                          handleredirect(`${data.redirectURL[index]}`)
+                        }
+                        className="ml-3 mt-2"
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="18px"
+                        viewBox="0 0 24 24"
+                        width="18px"
+                        fill="#FFFFFF"
+                      >
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                      </svg>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 flex">
+                    <p className="mt-3">
+                      {`${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/redirect/${shortId}`}
+                    </p>
+                    <svg
+                      onClick={() =>
+                        handleredirect(
+                          `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/redirect/${shortId}`
+                        )
+                      }
+                      className="ml-3 mt-3"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="18px"
+                      viewBox="0 0 24 24"
+                      width="18px"
+                      fill="#FFFFFF"
+                    >
+                      <path d="M0 0h24v24H0V0z" fill="none" />
+                      <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                    </svg>
+                  </td>
                   <td className="px-6 py-4">
                     <img
+                      onClick={() => openQRPopup(data.qrCodeUrl[index])}
                       src={data.qrCodeUrl[index]}
                       alt={`QR Code for ${shortId}`}
                       className="w-8 h-8"
                     />
                   </td>
-                  <td className="px-6 py-4">10/12/2024</td>
-                  <td className="px-6 py-4">97</td>
+                  <td className="px-6 py-4">
+                    {data.formattedCreatedAt[index]}
+                  </td>
+                  <td className="px-6 py-4">{data.shortIdCounts[shortId]}</td>
                   <td className="px-6 py-4">
                     <button
                       className="mt-2 text-gray-900 h-fit dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 rounded-lg py-2 px-2.5 inline-flex items-center justify-center bg-white border-gray-200 border"
                       type="button"
                     >
                       <span
-                        onClick={toggleCopy}
-                        id="default-message"
+                        onClick={() => toggleCopy(shortId)} // Pass shortId as argument
+                        id={`default-message-${shortId}`} // Add shortId to id
                         className="inline-flex items-center"
                       >
                         <svg
@@ -480,12 +602,10 @@ export default function Home() {
                         <span className="text-xs font-semibold">Copy</span>
                       </span>
                       <span
-                        id="success-message"
-                        className={
-                          !copied
-                            ? "hidden items-center"
-                            : "inline-flex items-center"
-                        }
+                        id={`success-message-${shortId}`} // Add shortId to id
+                        className={`inline-flex items-center ${
+                          !copied ? "hidden" : ""
+                        }`} // Check copied state
                       >
                         <svg
                           className="w-3 h-3 text-blue-700 dark:text-blue-500 me-1.5"
@@ -509,7 +629,7 @@ export default function Home() {
                     </button>
                     <button
                       className="mt-2  text-gray-900 h-fit dark:text-gray-400 dark:bg-gray-800 hover:text-white text-xs rounded-lg py-2 px-2.5 inline-flex font-semibold ml-3 items-center justify-center bg-white border-gray-500 border hover:bg-red-500"
-                      onClick={openDeletePopup}
+                      onClick={() => openDeletePopup(shortId)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
