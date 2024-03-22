@@ -3,7 +3,6 @@ import React, { useCallback, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
-import cookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import "dotenv";
 
