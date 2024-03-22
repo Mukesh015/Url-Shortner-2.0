@@ -22,6 +22,7 @@ export default function Stats() {
   const [deleteUrl, setDeleteUrl] = useState(null);
   const [downloadQrCode, setdownloadQrCode] = useState(false);
   const [dateDropDown, setDateDropDown] = useState(false);
+  const [dateData, setDateData] = useState(null);
 
   const handleDateDropdown = useCallback(() => {
     setDateDropDown((prevState) => !prevState);

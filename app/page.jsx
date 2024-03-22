@@ -165,6 +165,7 @@ export default function Home() {
         tabIndex="-1"
         aria-hidden="true"
         className="hidden overflow-y-auto overflow-x-hidden fixed z-20 bg-transparent justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+        style={{ marginLeft: "1130px", marginTop: "70px", width: "400px" }}
       >
         <div className="p-4 w-full max-w-md max-h-full">
           <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -515,7 +516,7 @@ export default function Home() {
       </div>
       <div className="ml-96 mt-3 flex">
         <svg
-        className="m-1"
+          className="m-1"
           xmlns="http://www.w3.org/2000/svg"
           height="18px"
           viewBox="0 0 24 24"
