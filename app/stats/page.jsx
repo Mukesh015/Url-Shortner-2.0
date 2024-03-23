@@ -124,13 +124,16 @@ export default function Stats() {
 
   const getUrls = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8010/geturl", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/geturl`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
       if (!response.ok) {
         console.log("Fetching failed");
       } else {
