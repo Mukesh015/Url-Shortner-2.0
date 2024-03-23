@@ -23,6 +23,7 @@ export default function Stats() {
   const [downloadQrCode, setdownloadQrCode] = useState(false);
   const [dateDropDown, setDateDropDown] = useState(false);
   const [dateData, setDateData] = useState(null);
+  const [modifydata, setModifyData] = useState(false);
 
   const handleDateDropdown = useCallback(() => {
     setDateDropDown((prevState) => !prevState);
@@ -108,7 +109,9 @@ export default function Stats() {
   }, [email, deleteUrl, setDeletePopup]);
 
   const toggleCopy = (shortId) => {
-    navigator.clipboard.writeText(`http://localhost:8010/redirect/${shortId}`);
+    navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/${shortId}`
+    );
     const copyButton = document.getElementById(`default-message-${shortId}`);
     const copiedButton = document.getElementById(`success-message-${shortId}`);
     copyButton.classList.add("hidden");
@@ -133,7 +136,9 @@ export default function Stats() {
       } else {
         const Data = await response.json();
         setData(Data);
-        console.log(data);
+        setModifyData(Data);
+
+        console.log(Data);
       }
     } catch {
       console.log("Fetching failed, server error");
@@ -174,8 +179,8 @@ export default function Stats() {
       const filteredIndexes = [];
       const modifiedData = {};
 
-      for (let i = 0; i < data.createdat.length; i++) {
-        if (currentTime - data.createdat[i] < milliseconds) {
+      for (let i = 0; i < modifydata.createdat.length; i++) {
+        if (currentTime - modifydata.createdat[i] < milliseconds) {
           filteredIndexes.push(i);
         }
       }
@@ -207,6 +212,45 @@ export default function Stats() {
     },
     [data]
   );
+
+  useEffect(() => {
+    const handleSearchChange = (e) => {
+      const value = e.target.value.toLowerCase(); // Convert input value to lowercase for case-insensitive search
+      console.log(value);
+      const filteredShortIds = data.shortId.filter((shortId, index) => {
+        const shortIdLower =
+          `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/redirect/${shortId}`.toLowerCase(); // Convert shortId to lowercase
+        const redirectURLLower = data.redirectURL[index].toLowerCase(); // Convert redirectURL to lowercase
+        const shortIdCountLower = data.shortIdCounts[shortId]
+          .toString()
+          .toLowerCase(); // Convert shortIdCount to lowercase
+        const formattedCreatedAtLower =
+          data.formattedCreatedAt[index].toLowerCase(); // Convert formattedCreatedAt to lowercase
+        return (
+          shortIdLower.includes(value) ||
+          redirectURLLower.includes(value) ||
+          shortIdCountLower.includes(value) ||
+          formattedCreatedAtLower.includes(value)
+        );
+      });
+
+      // Based on filteredShortIds, filter the elements to hide or show
+      const rows = document.querySelectorAll("[data-row]");
+      rows.forEach((row, index) => {
+        const isVisible = filteredShortIds.includes(data.shortId[index]);
+        row.classList.toggle("hidden", !isVisible);
+      });
+    };
+
+    const searchInput = document.querySelector("[data-search]");
+    if (searchInput) {
+      searchInput.addEventListener("input", handleSearchChange);
+
+      return () => {
+        searchInput.removeEventListener("input", handleSearchChange);
+      };
+    }
+  }, [data]);
 
   useEffect(() => {
     if (session && session.user && session.user.image) {
@@ -543,10 +587,11 @@ export default function Stats() {
               </svg>
             </div>
             <input
-              type="text"
+              type="search"
               id="table-search"
-              className="block p-2 ps-10 cursor-not-allowed text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="block p-2 ps-10  text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search for items"
+              data-search
             />
           </div>
         </div>
@@ -579,6 +624,11 @@ export default function Stats() {
                 <tr
                   key={shortId}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                  data-short-id={shortId}
+                  data-short-id-count={data.shortIdCounts[index]}
+                  data-formatted-created-at={data.formattedCreatedAt[index]}
+                  data-redirect-url={data.redirectURL[index]}
+                  data-row
                 >
                   <td className="px-4 py-4">
                     <div className="flex">
@@ -708,7 +758,7 @@ export default function Stats() {
           <p className="p-3 text-gray-400">No records found</p>
         )}
       </div>
-
+      <div className="hidden"></div>
       <footer className="bg-white rounded-lg mt-72 shadow dark:bg-gray-900 ">
         <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
           <div className="sm:flex sm:items-center sm:justify-between">
