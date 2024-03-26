@@ -1,10 +1,10 @@
 {
-  "/_not-found": "app/_not-found.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
-  "/signup/page": "app/signup/page.js",
   "/forgotpassword/page": "app/forgotpassword/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/_not-found": "app/_not-found.js",
+  "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/login/page": "app/login/page.js",
   "/stats/page": "app/stats/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/signup/page": "app/signup/page.js"
 }
