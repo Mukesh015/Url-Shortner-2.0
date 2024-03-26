@@ -17,7 +17,7 @@ async function handleGenerateNewShortURL(req, res) {
   if (!url) return res.status(400).json({ error: "url is required" });
 
   const shortId = shortid();
-  const shortUrl = `http://localhost:8010/redirect/${shortId}`;
+  const shortUrl = `https://url-shortner-api-swyt.onrender.com/redirect/${shortId}`;
   const qr_png = qr.imageSync(shortUrl, { type: "png" });
 
   try {
