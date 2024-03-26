@@ -24,6 +24,7 @@ export default function Stats() {
   const [dateDropDown, setDateDropDown] = useState(false);
   const [dateData, setDateData] = useState(null);
   const [modifydata, setModifyData] = useState(false);
+  const [filter, setFilter] = useState("All");
 
   const handleDateDropdown = useCallback(() => {
     setDateDropDown((prevState) => !prevState);
@@ -110,7 +111,7 @@ export default function Stats() {
 
   const toggleCopy = (shortId) => {
     navigator.clipboard.writeText(
-      `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/${shortId}`
+      `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/redirect/${shortId}`
     );
     const copyButton = document.getElementById(`default-message-${shortId}`);
     const copiedButton = document.getElementById(`success-message-${shortId}`);
@@ -176,6 +177,15 @@ export default function Stats() {
 
   const filterDays = useCallback(
     async (days) => {
+      if (days === null) {
+        setFilter("All");
+      } else if (days === 2) {
+        setFilter("Yesterday");
+      } else if (days === 7) {
+        setFilter("Last week");
+      } else if (days === 30) {
+        setFilter("This month");
+      }
       handleDateDropdown();
       const milliseconds = days * 24 * 60 * 60 * 1000; // Convert days to milliseconds
       const currentTime = Date.now();
@@ -270,7 +280,7 @@ export default function Stats() {
 
   useEffect(() => {
     console.log("Page rerendering...", data);
-  }, [data, deleteShortUrl]);
+  }, [data, deleteShortUrl,filter]);
 
   return (
     <>
@@ -517,7 +527,7 @@ export default function Stats() {
               type="button"
               className="hs-dropdown-toggle py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
             >
-              All
+              {filter}
               <svg
                 className="hs-dropdown-open:rotate-180 size-4"
                 xmlns="http://www.w3.org/2000/svg"
@@ -540,7 +550,7 @@ export default function Stats() {
                 aria-labelledby="hs-dropdown-default"
               >
                 <a
-                  onClick={() => window.location.reload()}
+                  onClick={() => filterDays(null)}
                   className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-gray-100 focus:outline-none focus:bg-gray-100  dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
                   href="#"
                 >
