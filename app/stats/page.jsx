@@ -9,7 +9,6 @@ import Cookies from "js-cookie";
 
 export default function Stats() {
   const { data: session } = useSession();
-
   const [dropdown, setDropdown] = useState(false);
   const [imgurl, setImgUrl] = useState(null);
   const [name, setName] = useState(null);
@@ -177,8 +176,9 @@ export default function Stats() {
 
   const filterDays = useCallback(
     async (days) => {
-      if (days === null) {
+      if (!modifydata.createdat || days === null) {
         setFilter("All");
+        return; // Exit early if modifydata.createdat is undefined or days is null
       } else if (days === 2) {
         setFilter("Yesterday");
       } else if (days === 7) {
@@ -191,7 +191,7 @@ export default function Stats() {
       const currentTime = Date.now();
       const filteredIndexes = [];
       const modifiedData = {};
-
+      console.log("Test", modifydata);
       for (let i = 0; i < modifydata.createdat.length; i++) {
         if (currentTime - modifydata.createdat[i] < milliseconds) {
           filteredIndexes.push(i);
@@ -200,16 +200,16 @@ export default function Stats() {
 
       // Push filtered data into modifiedData object
       modifiedData.shortId = filteredIndexes.map(
-        (index) => data.shortId[index]
+        (index) => modifydata.shortId[index]
       );
       modifiedData.qrCodeUrl = filteredIndexes.map(
-        (index) => data.qrCodeUrl[index]
+        (index) => modifydata.qrCodeUrl[index]
       );
       modifiedData.redirectURL = filteredIndexes.map(
-        (index) => data.redirectURL[index]
+        (index) => modifydata.redirectURL[index]
       );
       modifiedData.formattedCreatedAt = filteredIndexes.map(
-        (index) => data.formattedCreatedAt[index]
+        (index) => modifydata.formattedCreatedAt[index]
       );
 
       // Convert shortIdCounts array to object
@@ -223,7 +223,7 @@ export default function Stats() {
       console.log("Filtered indexes:", filteredIndexes);
       console.log("Modified data:", modifiedData);
     },
-    [data]
+    [data, modifydata.createdat]
   );
 
   useEffect(() => {
@@ -280,7 +280,7 @@ export default function Stats() {
 
   useEffect(() => {
     console.log("Page rerendering...", data);
-  }, [data, deleteShortUrl,filter]);
+  }, [data, deleteShortUrl, filter]);
 
   return (
     <>
@@ -406,7 +406,7 @@ export default function Stats() {
               </li>
               <li>
                 <a
-                  href="/stats"
+                  href="/contact"
                   className="block py-2 px-3 mr-7 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
                 >
                   Contact
@@ -414,7 +414,7 @@ export default function Stats() {
               </li>
               <li>
                 <a
-                  href="/stats"
+                  href="/about"
                   className="block py-2 px-3 mr-7 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
                 >
                   About
@@ -552,28 +552,24 @@ export default function Stats() {
                 <a
                   onClick={() => filterDays(null)}
                   className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-gray-100 focus:outline-none focus:bg-gray-100  dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
-                  href="#"
                 >
                   All
                 </a>
                 <a
                   onClick={() => filterDays(2)}
                   className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
-                  href="#"
                 >
                   Yesterday
                 </a>
                 <a
                   onClick={() => filterDays(7)}
                   className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
-                  href="#"
                 >
                   Last week
                 </a>
                 <a
                   onClick={() => filterDays(30)}
                   className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
-                  href="#"
                 >
                   This month
                 </a>
